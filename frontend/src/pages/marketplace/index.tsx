@@ -39,13 +39,17 @@ export default function Marketplace() {
 
     await contract.getAllArtworks().then(res => {
       setArtworks(res)
-      setSearchArtworks(res)
+      setSearchArtworks(res.filter(artwork => artwork.isVerified === true))
       console.log(res)
     })
   }
 
   function searchArtworksByName(e) {
-    setSearchArtworks(artworks.filter(artwork => artwork[1].toLowerCase().includes(searchName.toLowerCase())))
+    setSearchArtworks(
+      artworks.filter(
+        artwork => artwork[1].toLowerCase().includes(searchName.toLowerCase()) && artwork.isVerified === true
+      )
+    )
   }
   useEffect(() => {
     fetchAllArtworks()

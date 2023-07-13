@@ -36,7 +36,7 @@ export default function SingleArt({ artwork, imgSrc, Title, Artist, price, premi
     console.log(await contract.name())
   }
 
-  async function buyArtwork() {
+  async function buyArtwork(e) {
     console.log('Buy Artwork')
     const splittedValue = Math.floor(parseInt(price) / 10)
     const provider = new ethers.providers.Web3Provider(window.ethereum)

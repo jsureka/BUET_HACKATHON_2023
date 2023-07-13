@@ -1,22 +1,54 @@
-export default function VerifyOrders({ name, id }) {
-    return (
-        <>
-            <div className="grid grid-cols-3 grid-rows-1 gap-48 items-center py-4 hover:bg-primary">
-                <div className="flex flex-row items-center justify-start">
-                    <div className="relative w-12 h-12 mx-auto my-4">
-                        <img className="w-full h-full object-cover rounded-md" src="/soldArt.png" alt="Profile Image" />
-                    </div>
-                    <h1 className="text-bold text-lg ml-4">{name}</h1>
-                </div>
-                <div>
-                    <h1 className="text-lg pl-20">{id}</h1>
-                </div>
-                <div className="text-center px-6">
-                    <button className="w-8 bg-secondary-1 text-white py-2 px-6 rounded-lg">
-                        <h1>Verify</h1>
-                    </button>
-                </div>
-            </div>
-        </>
-    )
+import { ethers } from 'ethers'
+import { useState } from 'react'
+import { SupplyChain__factory } from 'typechain/factories/contracts/SupplyChain__factory'
+import { useAccount, useNetwork, useSwitchNetwork, useBalance } from 'wagmi'
+import data from '../../info/data.json'
+
+export default function VerifyOrders({ artwork }) {
+  const [showAlert, setShowAlert] = useState(false)
+  const [txHash, setTxHash] = useState('')
+  let contract
+  const { address, isConnected, connector } = useAccount()
+  const { chain, chains } = useNetwork()
+  const { isLoading: isNetworkLoading, pendingChainId, switchNetwork } = useSwitchNetwork()
+  const { data: balance, isLoading: isBalanceLoading } = useBalance({
+    addressOrName: address,
+  })
+
+  async function verifyArtwork(e) {
+    console.log('Buy Artwork')
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const signer = provider.getSigner()
+    contract = SupplyChain__factory.connect(data.contractAddress, signer)
+    let tx = await contract.issueCertificate(parseInt(artwork[0].toString()), Date.now().toString(), 'verified artwork')
+    let reciept = await tx.wait()
+    console.log(reciept)
+    setTxHash(reciept.transactionHash)
+    setShowAlert(true)
+  }
+  return (
+    <>
+      <div className="grid grid-cols-3 grid-rows-1 items-center gap-48 py-4 hover:bg-primary">
+        <div className="flex flex-row items-center justify-start">
+          <div className="w-12 relative mx-auto my-4 h-12">
+            <img className="w-full h-full rounded-md object-cover" src={artwork.tokenURI} alt="Profile Image" />
+          </div>
+          <h1 className="text-bold ml-4 text-lg">{parseInt(artwork[0].toString())}</h1>
+        </div>
+        <div>
+          <h1 className="pl-20 text-lg">{artwork.description}</h1>
+        </div>
+        <div className="px-6 text-center">
+          <button
+            onClick={e => {
+              verifyArtwork(e)
+            }}
+            className="w-8 rounded-lg bg-secondary-1 py-2 px-6 text-white"
+          >
+            <h1>Verify</h1>
+          </button>
+        </div>
+      </div>
+    </>
+  )
 }
