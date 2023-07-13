@@ -48,7 +48,6 @@ describe("Greeter tests", function () {
         10,
         "Token URI",
         1,
-        false,
         0
       );
     
@@ -66,16 +65,16 @@ describe("Greeter tests", function () {
       const { greeter, owner, otherAccounts } = await loadFixture(deployOnceFixture);
 
       // Call the `addArtwork` function to add artworks
-      await greeter.addArtwork("Artwork 1", "", 100, 1, "", 1, false, 0);
-      await greeter.addArtwork("Artwork 2", "", 200, 1, "", 1, true, 0);
-      await greeter.addArtwork("Artwork 3", "", 300, 1, "", 1, true, 0);
-      await greeter.addArtwork("Artwork 4", "", 400, 1, "", 1, false, 0);
+      await greeter.addArtwork("Artwork 1", "", 100, 1, "", 1, 0);
+      await greeter.addArtwork("Artwork 2", "", 200, 1, "", 1, 0);
+      await greeter.addArtwork("Artwork 3", "", 300, 1, "", 1, 0);
+      await greeter.addArtwork("Artwork 4", "", 400, 1, "", 1, 0);
 
       // Call the `getVerifiedArtworks` function to get the verified artworks
-      const verifiedArtworks = await greeter.getVerifiedArtworks();
+      const verifiedArtworks = await greeter.getAllArtworks();
 
       // Assert the number of verified artworks returned by the function
-      expect(verifiedArtworks.length).to.be.eq(0);
+      expect(verifiedArtworks.length).to.be.eq(4);
 
       // Assert the details of the verified artworks
       // expect(verifiedArtworks[0].description).to.be.eq("Artwork 2");
@@ -96,27 +95,83 @@ describe("Greeter tests", function () {
       expect(await greeter.totalArtworks()).to.be.eq(0);
     });
 
+    it("should issue a certificate and retrieve its data", async function () {
+      const { greeter } = await loadFixture(deployOnceFixture);
+      const artworkId = 1;
+      const issueDate = Math.floor(Date.now() / 1000);
+      const tokenURI = "https://example.com/certificate/1";
+  
+      // Issue a certificate
+      await greeter.issueCertificate(artworkId, issueDate, tokenURI);
+  
+      // Retrieve the certificate data
+      const certificateData = await greeter.getCertificateData(1);
+  
+      // Assert the retrieved certificate data
+      expect(certificateData[0]).to.be.eq(artworkId);
+      expect(certificateData[2]).to.be.eq(issueDate);
+    });
+  
+    it("should revert when trying to retrieve data for a non-existent certificate", async function () {
+      const { greeter } = await loadFixture(deployOnceFixture);
+      const nonExistentTokenId = 1;
+  
+      // Try to retrieve data for a non-existent certificate
+      await expect(greeter.getCertificateData(nonExistentTokenId)).to.be.revertedWith(
+        "Certificate: Token ID does not exist"
+      );
+    });
+
+
     
+
+
+
+    it("Check if the buyer can place order", async function () {
+      const { greeter, owner } = await loadFixture(deployOnceFixture);
     
-    // it("Check if it creates all an artwork", async function () {
-    //   const { greeter } = await loadFixture(deployOnceFixture);
+      // Call the `addArtwork` function with sample parameters
+      await greeter.addArtwork(
+        "Artwork description",
+        "Artwork image",
+        100,
+        10,
+        "Token URI",
+        1,
+        0
+      );
+    
+      // Print the details of the added artwork
+      const artwork = await greeter.artworks(1);
+      console.log("Artwork description:", artwork.description);
+    
+      // Assert that the totalArtworks value has increased
+      expect(await greeter.totalArtworks()).to.be.eq(1);
+    
+      // Add more assertions for other properties
+    });
 
-    //   expect(await greeter.totalArtworks()).to.be.eq(0);
-    // });
+    it("Check if it returns all artworks", async function () {
+      const { greeter, owner, otherAccounts } = await loadFixture(deployOnceFixture);
 
-    // it("Check if greet can be updated", async function () {
-    //   const { greeter, owner } = await loadFixture(deployOnceFixture);
-    //   let tx = await greeter.connect(owner).setGreeting("Hello, universe!");
-    //   (await tx).wait();
-    //   expect(await greeter.greet()).to.be.eq("Hello, universe!");
-    // });
+      // Call the `addArtwork` function to add artworks
+      await greeter.addArtwork("Artwork 1", "", 100, 1, "", 1, 0);
+      await greeter.addArtwork("Artwork 2", "", 200, 1, "", 1, 0);
+      await greeter.addArtwork("Artwork 3", "", 300, 1, "", 1, 0);
+      await greeter.addArtwork("Artwork 4", "", 400, 1, "", 1, 0);
 
-    // it("Check if not owner cant change greet", async function () {
-    //   const { greeter, owner, otherAccounts } = await loadFixture(
-    //     deployOnceFixture
-    //   );
-    //   await expect(
-    //     greeter.connect(otherAccounts[0]).setGreeting("Hello, universe!")
-    //   ).to.be.reverted;
-    // });
+      // Call the `getVerifiedArtworks` function to get the verified artworks
+      const verifiedArtworks = await greeter.getAllArtworks();
+
+      // Assert the number of verified artworks returned by the function
+      expect(verifiedArtworks.length).to.be.eq(4);
+
+      // Assert the details of the verified artworks
+      // expect(verifiedArtworks[0].description).to.be.eq("Artwork 2");
+      // expect(verifiedArtworks[1].description).to.be.eq("Artwork 3");
+      // Add more assertions for other properties
+    });
+
+
+    
   });
