@@ -24,11 +24,9 @@ export default function Home() {
               <h1 className='text-2xl'><b className='text-3xl'>260K+</b><br />Artists & Creators</h1>
           </div>
         </div>
-        <div className='w-3/5 flex justify-center'>
-           <div className="w-full h-auto rounded-lg overflow-hidden shadow-lg">
-            <div className='flex-shrink-0'>
+        <div className='w-2/5 flex justify-center'>
+           <div className="max-w-5xl rounded-lg overflow-hidden shadow-lg ">
               <img className="w-full aspect-video object-cover" src="/dashboard-nft.png" alt="The Cat" />
-              </div>
             <div className="px-6 py-4 bg-new-gray">
             <div className="text-lg mb-2">The Wool Cat</div>
             </div>

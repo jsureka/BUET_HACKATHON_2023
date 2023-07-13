@@ -2,7 +2,7 @@ import { Disclosure } from '@headlessui/react';
 import { useState } from 'react';
 import ConnectWallet from 'components/Connect/ConnectWallet';
 
-export default function NavbarHome() {
+export default function NavbarHome({current}) {
   const [name, setName] = useState('Tasmia Zerin');
   const [connected, setConnected] = useState(true);
 
@@ -31,10 +31,16 @@ export default function NavbarHome() {
               className="absolute inset-y-0 right-0 flex pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0"
             >
             <button type="button" className="mx-6 font-semibold">
-                <h1>Marketplace</h1>
+              { current === 'marketplace' ? <h1 className='bg-gradient-to-br from-secondary-1 to-secondary-2 bg-clip-text text-transparent'>Marketplace</h1> : <h1>Marketplace</h1> }
             </button>
             <button type="button" className="mx-6 font-semibold">
-            <h1>Ranking</h1>
+              { current === 'ranking' ? <h1 className='bg-gradient-to-br from-secondary-1 to-secondary-2 bg-clip-text text-transparent'>Ranking</h1> : <h1>Ranking</h1> }
+            </button>
+            <button type="button" className="mx-6 font-semibold">
+              { current === 'order' ? <h1 className='bg-gradient-to-br from-secondary-1 to-secondary-2 bg-clip-text text-transparent'>Orders</h1> : <h1>Orders</h1> }
+            </button>
+            <button type="button" className="mx-6 font-semibold">
+              { current === 'create' ? <h1 className='bg-gradient-to-br from-secondary-1 to-secondary-2 bg-clip-text text-transparent'>Create</h1> : <h1>Create</h1> }
             </button>
             <div className="flex w-full flex-col items-center ml-6">
              <ConnectWallet />
