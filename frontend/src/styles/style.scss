@@ -4,3 +4,20 @@
 @import 'base';
 @import 'utils';
 @import '@rainbow-me/rainbowkit/styles.css';
+
+
+@layer base {
+    h1 {
+      @apply font-display;
+    }
+    h2 {
+      @apply font-display;
+    }
+    h3 {
+      @apply font-display;
+    }
+    p {
+      @apply font-body;
+    }
+  }
+  

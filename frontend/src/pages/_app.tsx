@@ -108,7 +108,7 @@ export function Web3Wrapper({ children }) {
       <RainbowKitProvider
         chains={chains}
         initialChain={1} // Optional, initialChain={1}, initialChain={chain.mainnet}, initialChain={gnosisChain}
-        showRecentTransactions={true}
+        showRecentTransactions={true} coolMode
         theme={resolvedTheme === 'dark' ? darkTheme() : lightTheme()}
       >
         {children}
