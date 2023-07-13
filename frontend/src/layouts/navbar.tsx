@@ -41,7 +41,7 @@ export default function NavbarHome({current}) {
               { current === 'ranking' ? <h1 className='bg-gradient-to-br from-secondary-1 to-secondary-2 bg-clip-text text-transparent'>Ranking</h1> : <h1><Link href='/ranking'>Ranking</Link></h1> }
             </button>
             <button type="button" className="mx-6 font-semibold">
-              { current === 'order' ? <h1 className='bg-gradient-to-br from-secondary-1 to-secondary-2 bg-clip-text text-transparent'>Orders</h1> : <h1><Link href='/orders'>Orders</Link></h1> }
+              { current === 'orders' ? <h1 className='bg-gradient-to-br from-secondary-1 to-secondary-2 bg-clip-text text-transparent'>Orders</h1> : <h1><Link href='/orders'>Orders</Link></h1> }
             </button>
             <button type="button" className="mx-6 font-semibold">
               { current === 'create' ? <h1 className='bg-gradient-to-br from-secondary-1 to-secondary-2 bg-clip-text text-transparent'>Create</h1> : <h1><Link href='/create'>Create</Link></h1> }
