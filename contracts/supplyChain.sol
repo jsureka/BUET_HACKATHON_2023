@@ -6,231 +6,365 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract ArtworkMarketplace  is ERC721URIStorage {
+contract supplyChain is ERC721URIStorage {
+  using Counters for Counters.Counter;
+  Counters.Counter private _tokenIds;
+  Counters.Counter private _itemsSold;
+  uint256 private tokenIdCounter;
+  address payable verifier;
+  mapping(uint256 => CertificateData) private certificates;
+  mapping(uint256 => string) private tokenURIs;
+  address payable owner;
 
-    using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds;
-    Counters.Counter private _itemsSold;
-    uint256 private tokenIdCounter;
-    address payable verifier;
-    mapping(uint256 => CertificateData) private certificates;
-    mapping(uint256 => string) private tokenURIs;
-    address payable owner;
+  // Constructor
+  constructor() ERC721("NFTMarketplace", "NFTM") {
+    owner = payable(msg.sender);
+  }
 
-    // Constructor
-    constructor()  ERC721("NFTMarketplace", "NFTM") {
-        owner = payable(msg.sender);
-    }
+  // Struct to represent an artwork
+  struct Artwork {
+    uint256 id;
+    string description;
+    string image;
+    uint256 price;
+    uint256 quantity;
+    address creator;
+    bool isVerified;
+    string tokenURI;
+    bool isPremium;
+    uint256 certificateId;
+    uint256 deadline;
+    uint256 totalBids;
+    Bid[] bids;
+  }
 
-    // Struct to represent an artwork
-    struct Artwork {
-        uint256 id;
-        string description;
-        string image;
-        uint256 price;
-        string creatorCredentials;
-        uint256 quantity;
-        address creator;
-        DeliveryStatus deliveryStatus;
-        bool isVerified;
-    }
-  
-    struct CertificateData {
-        uint256 artworkId;
-        uint256 issueDate;
-    }
+  struct CertificateData {
+    uint256 artworkId;
+    address creator;
+    uint256 issueDate;
+  }
 
-    // Enum to represent delivery status
-    enum DeliveryStatus { NotDelivered, Delivered }
+  // Enum to represent delivery status
+  enum DeliveryStatus {
+    NotDelivered,
+    Delivered,
+    Received
+  }
 
-    // Mapping to store artworks by their ID
-    mapping(uint256 => Artwork) public artworks;
-    uint256 public totalArtworks;
-    
-    // Mapping to store the authenticity certificate for each artwork
-    mapping(uint256 => address) public artworkCertificates;
+  // Mapping to store artworks by their ID
+  mapping(uint256 => Artwork) public artworks;
+  uint256 public totalArtworks;
 
-    // Mapping to store the orders by their ID
-    mapping(uint256 => Order) public orders;
-    uint256 public totalOrders;
-    
-    // Mapping to store the bids for each auction
-    mapping(uint256 => Bid) public bids;
-    uint256 public totalBids;
+  // Mapping to store the authenticity certificate for each artwork
+  mapping(uint256 => address) public artworkCertificates;
 
-    // Struct to represent an order
-    struct Order {
-        uint256 id;
-        uint256 artworkId;
-        address buyer;
-        bool confirmed;
-    }
-    
-    // Struct to represent a bid
-    struct Bid {
-        uint256 id;
-        uint256 artworkId;
-        address bidder;
-        uint256 amount;
-    }
+  // Mapping to store the orders by their ID
+  mapping(uint256 => Order) public orders;
+  uint256 public totalOrders;
 
-    // Events to notify clients
-    event ArtworkAdded(uint256 id);
-    event ArtworkQuantityUpdated(uint256 id, uint256 quantity);
-    event ArtworkDeliveryStatusUpdated(uint256 id, DeliveryStatus status);
-    event OrderPlaced(uint256 id);
-    event OrderConfirmed(uint256 id);
-    event BidPlaced(uint256 id);
+  // Struct to represent an order
+  struct Order {
+    uint256 id;
+    uint256 artworkId;
+    address buyer;
+    DeliveryStatus deliveryStatus;
+  }
 
-    // Modifier to check if the caller is the artwork creator
-    modifier onlyCreator(uint256 artworkId) {
-        require(msg.sender == artworks[artworkId].creator, "Only the artwork creator can perform this action");
-        _;
-    }
-           // Modifier to check if the caller is the artwork verifier
-    modifier onlyVerifier (uint256 artworkId) {
-        require(msg.sender != artworks[artworkId].creator, "Only the artwork verifier can perform this action");
-        _;
-    }
+  // Struct to represent a bid
+  struct Bid {
+    uint256 id;
+    uint256 artworkId;
+    address bidder;
+    uint256 amount;
+  }
 
+  // Events to notify clients
+  event ArtworkAdded(uint256 id);
+  event ArtworkQuantityUpdated(uint256 id, uint256 quantity);
+  event OrderDeliveryStatusUpdated(uint256 id, DeliveryStatus status);
+  event OrderPlaced(uint256 id);
+  event OrderConfirmed(uint256 id);
+  event BidPlaced(uint256 id);
 
-    // Modifier to check if the artwork exists
-    modifier artworkExists(uint256 artworkId) {
-        require(artworks[artworkId].id != 0, "Artwork does not exist");
-        _;
-    }
-    
-    // Modifier to check if the order exists
-    modifier orderExists(uint256 orderId) {
-        require(orders[orderId].id != 0, "Order does not exist");
-        _;
-    }
-    
-    // Modifier to check if the bid exists
-    modifier bidExists(uint256 bidId) {
-        require(bids[bidId].id != 0, "Bid does not exist");
-        _;
-    }
+  // Modifier to check if the caller is the artwork creator
+  modifier onlyCreator(uint256 artworkId, address creator) {
+    require(
+      creator == artworks[artworkId].creator,
+      "Only the artwork creator can perform this action"
+    );
+    _;
+  }
 
+  modifier onlyVerifier(uint256 artworkId) {
+    require(
+      msg.sender != artworks[artworkId].creator,
+      "Only the artwork verifier can perform this action"
+    );
+    _;
+  }
 
-    modifier isVerified(uint256 artworkId) {
-        require(artworks[artworkId].isVerified == true, "This artwork is already verified");
-        _;
-    }
+  // Modifier to check if the artwork exists
+  modifier artworkExists(uint256 artworkId) {
+    require(artworks[artworkId].id != 0, "Artwork does not exist");
+    _;
+  }
 
-    // Add an artwork to the marketplace
-function addArtwork(
+  // Modifier to check if the order exists
+  modifier orderExists(uint256 orderId) {
+    require(orders[orderId].id != 0, "Order does not exist");
+    _;
+  }
+
+  modifier isVerified(uint256 artworkId) {
+    require(
+      artworks[artworkId].isVerified == true,
+      "This artwork is already verified"
+    );
+    _;
+  }
+
+  // Add an artwork to the marketplace
+  function addArtwork(
     string memory description,
     string memory image,
     uint256 price,
-    string memory creatorCredentials,
-    uint256 quantity
-) external payable {
+    uint256 quantity,
+    string memory tokenURI,
+    uint256 certificateId,
+    bool isPremium,
+    uint256 deadline
+  ) external {
     require(quantity > 0, "Quantity must be greater than 0");
 
-        //     _tokenIds.increment();
-        // uint256 newTokenId = _tokenIds.current();
-        // _safeMint(msg.sender, newTokenId);
-        // _setTokenURI(newTokenId, tokenURI);
+    // _tokenIds.increment();
+    // uint256 newTokenId = _tokenIds.current();
+    // _safeMint(msg.sender, newTokenId);
+    // _setTokenURI(newTokenId, tokenURI);
 
     totalArtworks++;
-    Artwork storage newArtwork = artworks[totalArtworks];
+    Artwork memory newArtwork = artworks[totalArtworks];
     newArtwork.id = totalArtworks;
     newArtwork.description = description;
     newArtwork.image = image;
     newArtwork.price = price;
-    newArtwork.creatorCredentials = creatorCredentials;
     newArtwork.quantity = quantity;
     newArtwork.creator = msg.sender;
-    newArtwork.deliveryStatus = DeliveryStatus.NotDelivered;
-
+    newArtwork.tokenURI = tokenURI;
+    newArtwork.isPremium = isPremium;
+    newArtwork.deadline = deadline;
+    newArtwork.certificateId = certificateId;
+    newArtwork.bids = new Bid[](0);
+    newArtwork.totalBids = 0;
     emit ArtworkAdded(totalArtworks);
+  }
+
+  // Update the quantity of an artwork
+  function updateArtworkQuantity(
+    uint256 artworkId,
+    uint256 quantity,
+    address creator
+  ) external onlyCreator(artworkId, creator) artworkExists(artworkId) {
+    artworks[artworkId].quantity = quantity;
+    emit ArtworkQuantityUpdated(artworkId, quantity);
+  }
+
+  //get artworks by a creator
+  function getArtworksByCreator() public view returns (Artwork[] memory) {
+    uint256 artworksCount = 0;
+    for (uint256 i = 1; i <= totalArtworks; i++) {
+      if (artworks[i].creator == msg.sender) {
+        artworksCount++;
+      }
+    }
+    Artwork[] memory creatorArtworks = new Artwork[](artworksCount);
+    uint256 index = 0;
+
+    for (uint256 i = 1; i <= totalArtworks && index < artworksCount; i++) {
+      if (artworks[i].creator == msg.sender) {
+        creatorArtworks[index++] = artworks[i];
+      }
+    }
+
+    return creatorArtworks;
+  }
+
+  function getOrdersByCreator() public view returns (Order[] memory) {
+    uint256 ordersCount = 0;
+
+    for (uint256 i = 1; i <= totalOrders; i++) {
+      if (artworks[orders[i].artworkId].creator == msg.sender) {
+        ordersCount++;
+      }
+    }
+    Order[] memory creatorOrders = new Order[](ordersCount);
+    uint256 index = 0;
+
+    for (uint256 i = 1; i <= totalOrders && index < ordersCount; i++) {
+      if (artworks[orders[i].artworkId].creator == msg.sender) {
+        creatorOrders[index++] = orders[i];
+      }
+    }
+    return creatorOrders;
+  }
+
+  // Update the delivery status of an artwork
+  function updateOrderDeliveryStatus(uint256 orderId, DeliveryStatus status)
+    external
+    orderExists(orderId)
+  {
+    orders[orderId].deliveryStatus = status;
+    emit OrderDeliveryStatusUpdated(orderId, status);
+  }
+
+  // Place an order for an artwork
+  function placeOrder(uint256 artworkId)
+    public
+    payable
+    artworkExists(artworkId)
+  {
+    require(
+      msg.value == artworks[artworkId].price / 10,
+      "Incorrect payment amount"
+    );
+    require(
+      msg.sender != artworks[artworkId].creator,
+      "Product creator cannot buy"
+    );
+    require(artworks[artworkId].quantity > 0, "Product out of stock");
+    (bool sent, ) = payable(artworks[artworkId].creator).call{
+      value: msg.value
+    }("");
+    artworks[artworkId].quantity--;
+    totalOrders++;
+    orders[totalOrders] = Order(
+      totalOrders,
+      artworkId,
+      msg.sender,
+      DeliveryStatus.NotDelivered
+    );
+    emit OrderPlaced(totalOrders);
+  }
+
+  //Confirm receiving the order
+  function confirmOrderReception(uint256 orderId)
+    external
+    payable
+    orderExists(orderId)
+  {
+    Order storage order = orders[orderId];
+    require(
+      msg.value == (artworks[orders[orderId].artworkId].price * 9) / 10,
+      "Incorrect payment amount"
+    );
+    require(
+      order.buyer == msg.sender,
+      "Only the buyer can confirm order reception"
+    );
+    order.deliveryStatus = DeliveryStatus.Received;
+    emit OrderConfirmed(orderId);
+  }
+
+  //get verified artworks for buyer
+  function getVerifiedArtworks() public view returns (Artwork[] memory) {
+    uint256 verifiedCount = 0;
+    for (uint256 i = 1; i <= totalArtworks; i++) {
+      if (artworks[i].isVerified) {
+        verifiedCount++;
+      }
+    }
+    Artwork[] memory verifiedArtworks = new Artwork[](verifiedCount);
+    uint256 index = 0;
+    for (uint256 i = 1; i <= totalArtworks; i++) {
+      if (artworks[i].isVerified) {
+        verifiedArtworks[index] = artworks[i];
+        index++;
+      }
+    }
+
+    return verifiedArtworks;
+  }
+
+  //get placed orders of buyers
+  function getOrdersByBuyer(address buyer)
+    public
+    view
+    returns (Order[] memory)
+  {
+    uint256 buyerOrdersCount = 0;
+    for (uint256 i = 1; i <= totalOrders; i++) {
+      if (orders[i].buyer == buyer) {
+        buyerOrdersCount++;
+      }
+    }
+    Order[] memory buyerOrders = new Order[](buyerOrdersCount);
+    uint256 index = 0;
+    for (uint256 i = 1; i <= totalOrders; i++) {
+      if (orders[i].buyer == buyer) {
+        buyerOrders[index] = orders[i];
+        index++;
+      }
+    }
+
+    return buyerOrders;
+  }
+
+  // Place a bid in the auction
+  function placeBid(
+    uint256 artworkId,
+    uint256 amount,
+    uint256 currentTime
+  ) external payable artworkExists(artworkId) {
+    require(amount > 0, "Bid amount must be greater than 0");
+    require(
+      artworks[artworkId].isPremium == true,
+      "This product is not approved for bidding"
+    );
+    artworks[artworkId].totalBids++;
+    artworks[artworkId].bids.push(
+      Bid(artworks[artworkId].totalBids, artworkId, msg.sender, amount)
+    );
+    emit BidPlaced(artworks[artworkId].totalBids);
+  }
+
+  // verify certificate
+  function issueCertificate(
+    uint256 artworkId,
+    uint256 issueDate,
+    string memory tokenURI
+  ) external onlyVerifier(artworkId) returns (uint256) {
+    uint256 tokenId = tokenIdCounter;
+    tokenIdCounter++;
+
+    certificates[tokenId] = CertificateData(
+      artworkId,
+      artworks[artworkId].creator,
+      issueDate
+    );
+    tokenURIs[tokenId] = tokenURI;
+
+    _safeMint(msg.sender, tokenId);
+    _setTokenURI(tokenId, tokenURI);
+
+    return tokenId;
+  }
+
+  function getCertificateData(uint256 tokenId)
+    public
+    view
+    returns (uint256, uint256)
+  {
+    require(_exists(tokenId), "Certificate: Token ID does not exist");
+
+    CertificateData memory data = certificates[tokenId];
+    return (data.artworkId, data.issueDate);
+  }
+
+  function _beforeTokenTransfer(
+    address,
+    address,
+    uint256
+  ) internal pure override {
+    revert("Certificate: NFT is non-transferable");
+  }
 }
-
-    // Update the quantity of an artwork
-    function updateArtworkQuantity(uint256 artworkId, uint256 quantity) external onlyCreator(artworkId) artworkExists(artworkId) {
-        artworks[artworkId].quantity = quantity;
-        emit ArtworkQuantityUpdated(artworkId, quantity);
-    }
-    
-    // Update the delivery status of an artwork
-    function updateArtworkDeliveryStatus(uint256 artworkId, DeliveryStatus status) external artworkExists(artworkId) {
-        artworks[artworkId].deliveryStatus = status;
-        emit ArtworkDeliveryStatusUpdated(artworkId, status);
-    }
-
-    // Place an order for an artwork
-    function placeOrder(uint256 artworkId) external artworkExists(artworkId) {
-        totalOrders++;
-        orders[totalOrders] = Order(totalOrders, artworkId, msg.sender, false);
-        emit OrderPlaced(totalOrders);
-    }
-    
-    // Confirm an order by making a payment
-    function confirmOrder(uint256 orderId) external payable orderExists(orderId) {
-        Order storage order = orders[orderId];
-        require(!order.confirmed, "Order is already confirmed");
-        
-        Artwork storage artwork = artworks[order.artworkId];
-        require(artwork.quantity > 0, "Artwork is out of stock");
-        
-        // require(msg.value == artwork.price, "Incorrect payment amount");
-        
-        artwork.quantity--;
-        order.confirmed = true;
-        
-        emit OrderConfirmed(orderId);
-    }
-    
-    // Place a bid in the auction
-    function placeBid(uint256 artworkId, uint256 amount) external payable artworkExists(artworkId) {
-        require(amount > 0, "Bid amount must be greater than 0");
-        
-        totalBids++;
-        bids[totalBids] = Bid(totalBids, artworkId, msg.sender, amount);
-        
-        emit BidPlaced(totalBids);
-    }
-    
-    // verify certificate
-        function issueCertificate(
-        uint256 artworkId,
-        uint256 issueDate,
-        string memory tokenURI
-    ) external onlyVerifier(artworkId)  returns (uint256) {
-        uint256 tokenId = tokenIdCounter;
-        tokenIdCounter++;
-
-        certificates[tokenId] = CertificateData(artworkId, issueDate);
-        tokenURIs[tokenId] = tokenURI;
-
-        _safeMint(msg.sender, tokenId);
-        _setTokenURI(tokenId, tokenURI);
-
-        return tokenId;
-    }
-
-    function getCertificateData(uint256 tokenId)
-        public
-        view
-        returns (uint256, uint256)
-    {
-        require(_exists(tokenId), "Certificate: Token ID does not exist");
-
-        CertificateData memory data = certificates[tokenId];
-        return (data.artworkId, data.issueDate);
-    }
-
-
-    function _beforeTokenTransfer(
-        address,
-        address,
-        uint256
-    ) internal pure {
-        revert("Certificate: NFT is non-transferable");
-    }
-}
-
-
