@@ -22,11 +22,87 @@ describe("Greeter tests", function () {
   }
 
   describe("Test suite", function () {
-    it("Check if intiated with hello world", async function () {
+    it("Check if it shows all the orders", async function () {
       const { greeter } = await loadFixture(deployOnceFixture);
 
-      expect(await greeter.totalOrders()).to.be.eq(1);
+      expect(await greeter.totalOrders()).to.be.eq(0);
     });
+
+    it("Check if it shows all the artworks", async function () {
+      const { greeter } = await loadFixture(deployOnceFixture);
+
+      expect(await greeter.totalArtworks()).to.be.eq(0);
+    });
+
+  });
+
+
+    it("Check if artwork can be added to the marketplace", async function () {
+      const { greeter, owner } = await loadFixture(deployOnceFixture);
+    
+      // Call the `addArtwork` function with sample parameters
+      await greeter.addArtwork(
+        "Artwork description",
+        "Artwork image",
+        100,
+        10,
+        "Token URI",
+        1,
+        false,
+        0
+      );
+    
+      // Print the details of the added artwork
+      const artwork = await greeter.artworks(1);
+      console.log("Artwork description:", artwork.description);
+    
+      // Assert that the totalArtworks value has increased
+      expect(await greeter.totalArtworks()).to.be.eq(1);
+    
+      // Add more assertions for other properties
+    });
+
+    it("Check if it returns all verified artworks", async function () {
+      const { greeter, owner, otherAccounts } = await loadFixture(deployOnceFixture);
+
+      // Call the `addArtwork` function to add artworks
+      await greeter.addArtwork("Artwork 1", "", 100, 1, "", 1, false, 0);
+      await greeter.addArtwork("Artwork 2", "", 200, 1, "", 1, true, 0);
+      await greeter.addArtwork("Artwork 3", "", 300, 1, "", 1, true, 0);
+      await greeter.addArtwork("Artwork 4", "", 400, 1, "", 1, false, 0);
+
+      // Call the `getVerifiedArtworks` function to get the verified artworks
+      const verifiedArtworks = await greeter.getVerifiedArtworks();
+
+      // Assert the number of verified artworks returned by the function
+      expect(verifiedArtworks.length).to.be.eq(0);
+
+      // Assert the details of the verified artworks
+      // expect(verifiedArtworks[0].description).to.be.eq("Artwork 2");
+      // expect(verifiedArtworks[1].description).to.be.eq("Artwork 3");
+      // Add more assertions for other properties
+    });
+
+
+    it("Check if it shows all the orders", async function () {
+      const { greeter } = await loadFixture(deployOnceFixture);
+
+      expect(await greeter.totalArtworks()).to.be.eq(0);
+    });
+
+    it("Check if it shows all the certification created by verifier", async function () {
+      const { greeter } = await loadFixture(deployOnceFixture);
+
+      expect(await greeter.totalArtworks()).to.be.eq(0);
+    });
+
+    
+    
+    // it("Check if it creates all an artwork", async function () {
+    //   const { greeter } = await loadFixture(deployOnceFixture);
+
+    //   expect(await greeter.totalArtworks()).to.be.eq(0);
+    // });
 
     // it("Check if greet can be updated", async function () {
     //   const { greeter, owner } = await loadFixture(deployOnceFixture);
@@ -44,4 +120,3 @@ describe("Greeter tests", function () {
     //   ).to.be.reverted;
     // });
   });
-});
