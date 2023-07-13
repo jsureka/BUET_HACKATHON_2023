@@ -206,20 +206,20 @@ function addArtwork(
         return artworkCertificates[artworkId];
     }
 
-
     // verify certificate
         function issueCertificate(
         uint256 artworkId,
         uint256 issueDate,
-        string memory newTokenURI
+        string memory tokenURI
     ) external onlyVerifier(artworkId) {
         uint256 tokenId = tokenIdCounter;
         tokenIdCounter++;
 
         certificates[tokenId] = CertificateData(artworkId, issueDate);
-        tokenURIs[tokenId] = newTokenURI;
+        tokenURIs[tokenId] = tokenURI;
 
-        _mint(verifier, tokenId);
+        _safeMint(msg.sender, tokenId);
+        _setTokenURI(tokenId, tokenURI);
     }
 
     function getCertificateData(uint256 tokenId)
@@ -233,16 +233,16 @@ function addArtwork(
         return (data.artworkId, data.issueDate);
     }
 
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override
-        returns (string memory)
-    {
-        require(_exists(tokenId), "Certificate: Token ID does not exist");
+    // function tokenURI(uint256 tokenId)
+    //     public
+    //     view
+    //     override
+    //     returns (string memory)
+    // {
+    //     require(_exists(tokenId), "Certificate: Token ID does not exist");
 
-        return tokenURIs[tokenId];
-    }
+    //     return tokenURIs[tokenId];
+    // }
 
     function _beforeTokenTransfer(
         address,
