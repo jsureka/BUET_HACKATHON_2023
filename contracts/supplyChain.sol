@@ -60,8 +60,6 @@ contract ArtworkMarketplace  is ERC721URIStorage {
     mapping(uint256 => Bid) public bids;
     uint256 public totalBids;
 
-
-    
     // Struct to represent an order
     struct Order {
         uint256 id;
@@ -196,22 +194,12 @@ function addArtwork(
         emit BidPlaced(totalBids);
     }
     
-    // Verify the authenticity certificate for an artwork
-    // function verifyCertificate(uint256 artworkId, address certificate) external artworkExists(artworkId) isVerified(artworkId) {
-    //     artworkCertificates[artworkId] = certificate;
-    // }
-  
-    // Check the authenticity certificate for an artwork
-    function checkCertificate(uint256 artworkId) external view returns (address) {
-        return artworkCertificates[artworkId];
-    }
-
     // verify certificate
         function issueCertificate(
         uint256 artworkId,
         uint256 issueDate,
         string memory tokenURI
-    ) external onlyVerifier(artworkId) {
+    ) external onlyVerifier(artworkId)  returns (uint256) {
         uint256 tokenId = tokenIdCounter;
         tokenIdCounter++;
 
@@ -220,6 +208,8 @@ function addArtwork(
 
         _safeMint(msg.sender, tokenId);
         _setTokenURI(tokenId, tokenURI);
+
+        return tokenId;
     }
 
     function getCertificateData(uint256 tokenId)
