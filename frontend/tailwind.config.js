@@ -12,6 +12,7 @@ module.exports = {
     },
     width: {
        new: '30%',
+       hundred: '100%',
     },
     extend: {
       colors: {

@@ -11,7 +11,7 @@ const array = [...Array(8)]
 export default function Home() {
   return (
     <div className='bg-primary'>
-      <NavbarHome />
+      <NavbarHome current={null}/>
       <div className='px-48'>
       <div className='flex lg:flex-row sm:flex-col my-12 items-center'>
         <div className='w-3/5 pr-12'>
