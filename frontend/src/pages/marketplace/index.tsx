@@ -18,7 +18,9 @@ export default function Marketplace() {
     addressOrName: address,
   })
   const [artworks, setArtworks] = useState([])
+  const [searchArtworks, setSearchArtworks] = useState([])
 
+  const [searchName, setSearchName] = useState('')
   async function fetchAllArtworks() {
     const { ethereum } = window
     if (ethereum) {
@@ -37,10 +39,14 @@ export default function Marketplace() {
 
     await contract.getAllArtworks().then(res => {
       setArtworks(res)
+      setSearchArtworks(res)
       console.log(res)
     })
   }
 
+  function searchArtworksByName(e) {
+    setSearchArtworks(artworks.filter(artwork => artwork[1].toLowerCase().includes(searchName.toLowerCase())))
+  }
   useEffect(() => {
     fetchAllArtworks()
   }, [])
@@ -52,13 +58,40 @@ export default function Marketplace() {
         <h1 className="text-4xl font-bold">Browse Marketplace</h1>
         <h4 className="my-6 font-body text-2xl capitalize">Browse through more than 100 Artworks on the Marketplace</h4>
         <div className="my-8">
-          <Search />
+          <div className="mb-3">
+            <div className="w-full relative mb-4 flex flex-wrap items-stretch">
+              <input
+                type="search"
+                className="relative m-0 block w-[1px] min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-3 text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-primary focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-200 dark:focus:border-primary"
+                placeholder="Search"
+                value={searchName}
+                onChange={e => setSearchName(e.target.value)}
+                aria-label="Search"
+                aria-describedby="button-addon2"
+              />
+              <button
+                onClick={e => {
+                  searchArtworksByName(e)
+                }}
+                className="input-group-text flex items-center whitespace-nowrap rounded px-3 py-1.5 text-center text-base font-normal text-neutral-700 dark:text-neutral-200"
+                id="basic-addon2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                  <path
+                    fill-rule="evenodd"
+                    d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       <div className="bg-new-gray px-48 py-16">
         <div className="my-4 grid grid-cols-3 grid-rows-3 gap-8">
-          {artworks &&
-            artworks.map((artwork, index) => {
+          {searchArtworks &&
+            searchArtworks.map((artwork, index) => {
               return (
                 <SingleArt
                   artwork={artwork}
