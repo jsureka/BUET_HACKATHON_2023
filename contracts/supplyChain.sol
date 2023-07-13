@@ -24,7 +24,6 @@ contract supplyChain is ERC721URIStorage {
   struct Artwork {
     uint256 id;
     string description;
-    string image;
     uint256 price;
     uint256 quantity;
     address creator;
@@ -122,7 +121,6 @@ contract supplyChain is ERC721URIStorage {
 
   function addArtwork(
     string memory description,
-    string memory image,
     uint256 price,
     uint256 quantity,
     string memory tokenURI,
@@ -133,7 +131,6 @@ contract supplyChain is ERC721URIStorage {
     totalArtworks++;
     artworks[totalArtworks].id = totalArtworks;
     artworks[totalArtworks].description = description;
-    artworks[totalArtworks].image = image;
     artworks[totalArtworks].price = price;
     artworks[totalArtworks].quantity = quantity;
     artworks[totalArtworks].creator = msg.sender;
@@ -195,6 +192,7 @@ contract supplyChain is ERC721URIStorage {
       msg.sender != artworks[artworkId].creator,
       "Product creator cannot buy"
     );
+    require(artworks[artworkId].certificateId != 0, "Artwork is not verified");
     require(artworks[artworkId].quantity > 0, "Product out of stock");
     (bool sent, ) = payable(artworks[artworkId].creator).call{
       value: msg.value
@@ -237,8 +235,8 @@ contract supplyChain is ERC721URIStorage {
     Artwork[] memory allArtworks = new Artwork[](totalArtworks);
     uint256 index = 0;
     for (uint256 i = 1; i <= totalArtworks; i++) {
-        allArtworks[index] = artworks[i];
-        index++;
+      allArtworks[index] = artworks[i];
+      index++;
     }
 
     return allArtworks;
@@ -269,22 +267,22 @@ contract supplyChain is ERC721URIStorage {
   }
 
   // Place a bid in the auction
-//   function placeBid(
-//     uint256 artworkId,
-//     uint256 amount,
-//     uint256 currentTime
-//   ) external payable artworkExists(artworkId) {
-//     require(amount > 0, "Bid amount must be greater than 0");
-//     require(
-//       artworks[artworkId].isPremium == true,
-//       "This product is not approved for bidding"
-//     );
-//     artworks[artworkId].totalBids++;
-//     artworks[artworkId].bids.push(
-//       Bid(artworks[artworkId].totalBids, artworkId, msg.sender, amount)
-//     );
-//     emit BidPlaced(artworks[artworkId].totalBids);
-//   }
+  //   function placeBid(
+  //     uint256 artworkId,
+  //     uint256 amount,
+  //     uint256 currentTime
+  //   ) external payable artworkExists(artworkId) {
+  //     require(amount > 0, "Bid amount must be greater than 0");
+  //     require(
+  //       artworks[artworkId].isPremium == true,
+  //       "This product is not approved for bidding"
+  //     );
+  //     artworks[artworkId].totalBids++;
+  //     artworks[artworkId].bids.push(
+  //       Bid(artworks[artworkId].totalBids, artworkId, msg.sender, amount)
+  //     );
+  //     emit BidPlaced(artworks[artworkId].totalBids);
+  //   }
 
   // verify certificate
   function issueCertificate(
@@ -311,7 +309,11 @@ contract supplyChain is ERC721URIStorage {
   function getCertificateData(uint256 tokenId)
     public
     view
-    returns (uint256, address, uint256)
+    returns (
+      uint256,
+      address,
+      uint256
+    )
   {
     require(_exists(tokenId), "Certificate: Token ID does not exist");
 
@@ -319,11 +321,11 @@ contract supplyChain is ERC721URIStorage {
     return (data.artworkId, data.creator, data.issueDate);
   }
 
-//   function _beforeTokenTransfer(
-//     address,
-//     address,
-//     uint256
-//   ) internal pure {
-//     revert("Certificate: NFT is non-transferable");
-//   }
+  //   function _beforeTokenTransfer(
+  //     address,
+  //     address,
+  //     uint256
+  //   ) internal pure {
+  //     revert("Certificate: NFT is non-transferable");
+  //   }
 }

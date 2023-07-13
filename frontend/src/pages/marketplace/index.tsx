@@ -17,8 +17,9 @@ export default function Marketplace() {
   const { data: balance, isLoading: isBalanceLoading } = useBalance({
     addressOrName: address,
   })
+  const [artworks, setArtworks] = useState([])
 
-  async function checkIfWalletIsConnected() {
+  async function fetchAllArtworks() {
     const { ethereum } = window
     if (ethereum) {
       console.log('Got the ethereum object: ', ethereum)
@@ -34,11 +35,14 @@ export default function Marketplace() {
 
     console.log(contract)
 
-    console.log(await contract.name())
+    await contract.getAllArtworks().then(res => {
+      setArtworks(res)
+      console.log(res)
+    })
   }
 
   useEffect(() => {
-    checkIfWalletIsConnected()
+    fetchAllArtworks()
   }, [])
 
   return (
@@ -53,15 +57,29 @@ export default function Marketplace() {
       </div>
       <div className="bg-new-gray px-48 py-16">
         <div className="my-4 grid grid-cols-3 grid-rows-3 gap-8">
-          <SingleArt imgSrc={'/art-1.jpg'} Title={'Testing'} Artist={'Tasmia'} price={'3.5 ETH'} premium={false} />
-          <SingleArt imgSrc={'/art-2.jpg'} Title={'Testing'} Artist={'Jitesh'} price={'1.4 ETH'} premium={true} />
+          {artworks &&
+            artworks.map((artwork, index) => {
+              return (
+                <SingleArt
+                  artwork={artwork}
+                  key={index}
+                  imgSrc={artwork[6]}
+                  Title={artwork.description}
+                  Artist={artwork[4].toString()}
+                  price={artwork.price.toString()}
+                  premium={artwork.isPremium}
+                />
+              )
+            })}
+          {/* <SingleArt imgSrc={'/art-1.jpg'} Title={'Testing'} Artist={'Tasmia'} price={'3.5 ETH'} premium={false} /> */}
+          {/* <SingleArt imgSrc={'/art-2.jpg'} Title={'Testing'} Artist={'Jitesh'} price={'1.4 ETH'} premium={true} />
           <SingleArt imgSrc={'/art-3.jpg'} Title={'Testing'} Artist={'Mustahid'} price={'4.1 ETH'} premium={false} />
           <SingleArt imgSrc={'/art-4.jpg'} Title={'Testing'} Artist={'Tasmia'} price={'3.5 ETH'} premium={false} />
           <SingleArt imgSrc={'/art-5.jpg'} Title={'Testing'} Artist={'Jitesh'} price={'1.4 ETH'} premium={true} />
           <SingleArt imgSrc={'/art-6.jpg'} Title={'Testing'} Artist={'Mustahid'} price={'4.1 ETH'} premium={false} />
           <SingleArt imgSrc={'/art-1.jpg'} Title={'Testing'} Artist={'Tasmia'} price={'3.5 ETH'} premium={false} />
           <SingleArt imgSrc={'/art-2.jpg'} Title={'Testing'} Artist={'Jitesh'} price={'1.4 ETH'} premium={false} />
-          <SingleArt imgSrc={'/art-3.jpg'} Title={'Testing'} Artist={'Mustahid'} price={'4.1 ETH'} premium={true} />
+          <SingleArt imgSrc={'/art-3.jpg'} Title={'Testing'} Artist={'Mustahid'} price={'4.1 ETH'} premium={true} /> */}
         </div>
       </div>
     </div>

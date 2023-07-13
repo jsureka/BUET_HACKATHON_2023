@@ -64,7 +64,7 @@ export const uploadFileToIPFS = async (file: File) => {
   })
   data.append('pinataOptions', pinataOptions)
 
-  return axios
+  const response = await axios
     .post(url, data, {
       maxBodyLength: Infinity,
       headers: {
@@ -76,51 +76,67 @@ export const uploadFileToIPFS = async (file: File) => {
         'pinata_secret_api_key': secret,
       },
     })
-    .then(function (response) {
+    // .then(response => {
+    //   console.log('image uploaded', response.data.IpfsHash)
+    //   return {
+    //     success: true,
+    //     pinataURL: 'https://gateway.pinata.cloud/ipfs/' + response.data.IpfsHash,
+    //   }
+    // })
+    // .catch(function (error) {
+    //   console.log(error)
+    //   return {
+    //     success: false,
+    //     message: error.message,
+    //     pinataURL: '',
+    //   }
+    // })
+    if(response.status === 200) {
       console.log('image uploaded', response.data.IpfsHash)
       return {
         success: true,
         pinataURL: 'https://gateway.pinata.cloud/ipfs/' + response.data.IpfsHash,
       }
-    })
-    .catch(function (error) {
-      console.log(error)
+    }
+    else {
+      console.log(response)
       return {
         success: false,
-        message: error.message,
+        message: response.statusText,
+        pinataURL: '',
       }
-    })
-}
-
-export default function Pinata() {
-  async function OnChangeFile(e) {
-    var file = e.target.files[0]
-
-    //check for file extension
-    try {
-      //upload the file to IPFS
-      const response = await uploadFileToIPFS(file)
-      if (response.success === true) {
-        console.log('Uploaded image to Pinata: ')
-      }
-    } catch (e) {
-      console.log('Error during file upload', e)
     }
-  }
-
-  return (
-    <div>
-      <h1>Pinata</h1>
-      {/* form */}
-      <form>
-        <div>
-          <label className="mb-2 block text-sm font-bold text-purple-500" htmlFor="image">
-            Upload Image (&lt;500 KB)
-          </label>
-          <input type={'file'} onChange={OnChangeFile}></input>
-        </div>
-        <button type="submit">Submit</button>
-      </form>
-    </div>
-  )
 }
+
+// export function Pinata() {
+//   async function OnChangeFile(e) {
+//     var file = e.target.files[0]
+
+//     //check for file extension
+//     try {
+//       //upload the file to IPFS
+//       const response = await uploadFileToIPFS(file)
+//       if (response.success === true) {
+//         console.log('Uploaded image to Pinata: ')
+//       }
+//     } catch (e) {
+//       console.log('Error during file upload', e)
+//     }
+//   }
+
+//   return (
+//     <div>
+//       <h1>Pinata</h1>
+//       {/* form */}
+//       <form>
+//         <div>
+//           <label className="mb-2 block text-sm font-bold text-purple-500" htmlFor="image">
+//             Upload Image (&lt;500 KB)
+//           </label>
+//           <input type={'file'} onChange={OnChangeFile}></input>
+//         </div>
+//         <button type="submit">Submit</button>
+//       </form>
+//     </div>
+//   )
+// }
