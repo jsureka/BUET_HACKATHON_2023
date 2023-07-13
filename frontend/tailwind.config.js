@@ -6,7 +6,17 @@ module.exports = {
   ],
   darkMode: 'class', // 'media' is the default, change to 'class' if you want to use dark mode in with class names
   theme: {
-    extend: {},
+    fontFamily: {
+      display: ['Poppins', 'sans-serif'],
+      body: ['"Open Sans"', 'serif'],
+    },
+    extend: {
+      colors: {
+        'primary': '#2B2B2B',
+        'secondary': '#53AF32',
+        'dark': '#F7F8F9',
+      },
+    },
   },
   plugins: [
     require('@tailwindcss/typography'),

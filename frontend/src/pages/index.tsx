@@ -116,7 +116,7 @@ function Main() {
   return (
     <main className={styles.main + ' space-y-6'}>
       <div className="text-center">
-        <p className="font-medium">My DAPP</p>
+        <p className="font-medium">It's JSureka's DAPP</p>
       </div>
 
       <div>

@@ -11,8 +11,9 @@
     "ff": "npx prettier --write ./src"
   },
   "dependencies": {
-    "@headlessui/react": "^1.6.6",
-    "@heroicons/react": "^1.0.5",
+    "@headlessui/react": "^1.7.15",
+    "@heroicons/react": "^1.0.6",
+    "@next/font": "^13.4.9",
     "@popperjs/core": "^2.11.5",
     "@rainbow-me/rainbowkit": "^0.4.4",
     "@tailwindcss/typography": "^0.5.4",
