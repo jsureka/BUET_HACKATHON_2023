@@ -29,6 +29,7 @@
     "@openzeppelin/contracts": "^4.7.2",
     "dotenv": "^16.0.1",
     "ethereum-waffle": "^3.4.4",
+    "fs": "^0.0.1-security",
     "prettier": "^2.7.1",
     "prettier-plugin-solidity": "^1.0.0-dev.23",
     "solhint": "^3.3.7",

@@ -9,9 +9,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 contract supplyChain is ERC721URIStorage {
   using Counters for Counters.Counter;
-  Counters.Counter private _tokenIds;
-  Counters.Counter private _itemsSold;
-  uint256 private tokenIdCounter;
+  Counters.Counter private _certificateTokenIds;
   address payable verifier;
   mapping(uint256 => CertificateData) private certificates;
   mapping(uint256 => string) private tokenURIs;
@@ -35,8 +33,6 @@ contract supplyChain is ERC721URIStorage {
     bool isPremium;
     uint256 certificateId;
     uint256 deadline;
-    uint256 totalBids;
-    Bid[] bids;
   }
 
   struct CertificateData {
@@ -124,7 +120,6 @@ contract supplyChain is ERC721URIStorage {
     _;
   }
 
-  // Add an artwork to the marketplace
   function addArtwork(
     string memory description,
     string memory image,
@@ -132,30 +127,19 @@ contract supplyChain is ERC721URIStorage {
     uint256 quantity,
     string memory tokenURI,
     uint256 certificateId,
-    bool isPremium,
     uint256 deadline
   ) external {
     require(quantity > 0, "Quantity must be greater than 0");
-
-    // _tokenIds.increment();
-    // uint256 newTokenId = _tokenIds.current();
-    // _safeMint(msg.sender, newTokenId);
-    // _setTokenURI(newTokenId, tokenURI);
-
     totalArtworks++;
-    Artwork memory newArtwork = artworks[totalArtworks];
-    newArtwork.id = totalArtworks;
-    newArtwork.description = description;
-    newArtwork.image = image;
-    newArtwork.price = price;
-    newArtwork.quantity = quantity;
-    newArtwork.creator = msg.sender;
-    newArtwork.tokenURI = tokenURI;
-    newArtwork.isPremium = isPremium;
-    newArtwork.deadline = deadline;
-    newArtwork.certificateId = certificateId;
-    newArtwork.bids = new Bid[](0);
-    newArtwork.totalBids = 0;
+    artworks[totalArtworks].id = totalArtworks;
+    artworks[totalArtworks].description = description;
+    artworks[totalArtworks].image = image;
+    artworks[totalArtworks].price = price;
+    artworks[totalArtworks].quantity = quantity;
+    artworks[totalArtworks].creator = msg.sender;
+    artworks[totalArtworks].tokenURI = tokenURI;
+    artworks[totalArtworks].deadline = deadline;
+    artworks[totalArtworks].certificateId = certificateId;
     emit ArtworkAdded(totalArtworks);
   }
 
@@ -167,26 +151,6 @@ contract supplyChain is ERC721URIStorage {
   ) external onlyCreator(artworkId, creator) artworkExists(artworkId) {
     artworks[artworkId].quantity = quantity;
     emit ArtworkQuantityUpdated(artworkId, quantity);
-  }
-
-  //get artworks by a creator
-  function getArtworksByCreator() public view returns (Artwork[] memory) {
-    uint256 artworksCount = 0;
-    for (uint256 i = 1; i <= totalArtworks; i++) {
-      if (artworks[i].creator == msg.sender) {
-        artworksCount++;
-      }
-    }
-    Artwork[] memory creatorArtworks = new Artwork[](artworksCount);
-    uint256 index = 0;
-
-    for (uint256 i = 1; i <= totalArtworks && index < artworksCount; i++) {
-      if (artworks[i].creator == msg.sender) {
-        creatorArtworks[index++] = artworks[i];
-      }
-    }
-
-    return creatorArtworks;
   }
 
   function getOrdersByCreator() public view returns (Order[] memory) {
@@ -261,28 +225,23 @@ contract supplyChain is ERC721URIStorage {
       order.buyer == msg.sender,
       "Only the buyer can confirm order reception"
     );
+    (bool sent, ) = payable(artworks[orders[orderId].artworkId].creator).call{
+      value: msg.value
+    }("");
     order.deliveryStatus = DeliveryStatus.Received;
     emit OrderConfirmed(orderId);
   }
 
   //get verified artworks for buyer
-  function getVerifiedArtworks() public view returns (Artwork[] memory) {
-    uint256 verifiedCount = 0;
-    for (uint256 i = 1; i <= totalArtworks; i++) {
-      if (artworks[i].isVerified) {
-        verifiedCount++;
-      }
-    }
-    Artwork[] memory verifiedArtworks = new Artwork[](verifiedCount);
+  function getAllArtworks() public view returns (Artwork[] memory) {
+    Artwork[] memory allArtworks = new Artwork[](totalArtworks);
     uint256 index = 0;
     for (uint256 i = 1; i <= totalArtworks; i++) {
-      if (artworks[i].isVerified) {
-        verifiedArtworks[index] = artworks[i];
+        allArtworks[index] = artworks[i];
         index++;
-      }
     }
 
-    return verifiedArtworks;
+    return allArtworks;
   }
 
   //get placed orders of buyers
@@ -310,22 +269,22 @@ contract supplyChain is ERC721URIStorage {
   }
 
   // Place a bid in the auction
-  function placeBid(
-    uint256 artworkId,
-    uint256 amount,
-    uint256 currentTime
-  ) external payable artworkExists(artworkId) {
-    require(amount > 0, "Bid amount must be greater than 0");
-    require(
-      artworks[artworkId].isPremium == true,
-      "This product is not approved for bidding"
-    );
-    artworks[artworkId].totalBids++;
-    artworks[artworkId].bids.push(
-      Bid(artworks[artworkId].totalBids, artworkId, msg.sender, amount)
-    );
-    emit BidPlaced(artworks[artworkId].totalBids);
-  }
+//   function placeBid(
+//     uint256 artworkId,
+//     uint256 amount,
+//     uint256 currentTime
+//   ) external payable artworkExists(artworkId) {
+//     require(amount > 0, "Bid amount must be greater than 0");
+//     require(
+//       artworks[artworkId].isPremium == true,
+//       "This product is not approved for bidding"
+//     );
+//     artworks[artworkId].totalBids++;
+//     artworks[artworkId].bids.push(
+//       Bid(artworks[artworkId].totalBids, artworkId, msg.sender, amount)
+//     );
+//     emit BidPlaced(artworks[artworkId].totalBids);
+//   }
 
   // verify certificate
   function issueCertificate(
@@ -333,17 +292,17 @@ contract supplyChain is ERC721URIStorage {
     uint256 issueDate,
     string memory tokenURI
   ) external onlyVerifier(artworkId) returns (uint256) {
-    uint256 tokenId = tokenIdCounter;
-    tokenIdCounter++;
-
+    _certificateTokenIds.increment();
+    uint256 tokenId = _certificateTokenIds.current();
     certificates[tokenId] = CertificateData(
       artworkId,
       artworks[artworkId].creator,
       issueDate
     );
+    artworks[artworkId].isVerified = true;
     tokenURIs[tokenId] = tokenURI;
 
-    _safeMint(msg.sender, tokenId);
+    _safeMint(owner, tokenId);
     _setTokenURI(tokenId, tokenURI);
 
     return tokenId;
@@ -352,19 +311,19 @@ contract supplyChain is ERC721URIStorage {
   function getCertificateData(uint256 tokenId)
     public
     view
-    returns (uint256, uint256)
+    returns (uint256, address, uint256)
   {
     require(_exists(tokenId), "Certificate: Token ID does not exist");
 
     CertificateData memory data = certificates[tokenId];
-    return (data.artworkId, data.issueDate);
+    return (data.artworkId, data.creator, data.issueDate);
   }
 
-  function _beforeTokenTransfer(
-    address,
-    address,
-    uint256
-  ) internal pure override {
-    revert("Certificate: NFT is non-transferable");
-  }
+//   function _beforeTokenTransfer(
+//     address,
+//     address,
+//     uint256
+//   ) internal pure {
+//     revert("Certificate: NFT is non-transferable");
+//   }
 }
