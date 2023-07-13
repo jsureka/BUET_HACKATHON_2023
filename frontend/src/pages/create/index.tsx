@@ -15,6 +15,7 @@ export default function CreateArt() {
   const [tokenURI, setTokenURI] = useState('')
   const [selectedFile, setSelectedFile] = useState(null)
   const [selectedFileName, setSelectedFileName] = useState('No File Chosen')
+  const [auctionTime, setAuctionTime] = useState(new Date());
 
   const [showAlert, setShowAlert] = useState(false)
   const [txHash, setTxHash] = useState('')
@@ -167,11 +168,19 @@ export default function CreateArt() {
             <h2 className="my-4 font-display text-xl">Choose Type</h2>
             <MyListbox type={isPremium} setType={setIsPremium} />
           </div>
+          { isPremium ? 
+          <div className="mb-8">
+            <h2 className="my-4 font-display text-xl">Set Auction Ending Time</h2>
+            <input type="datetime-local" onChange={(e) => setAuctionTime(new Date(e.target.value))}/>
+          </div>
+          :
+          <></>
+              }
           <div className="mb-8">
             <h2 className="my-4 font-display text-xl">Quantity</h2>
             <div className="flex w-new flex-row">
-              <button className="text-2xl font-bold" onClick={e => changeQuantity('add', e)}>
-                +
+              <button className="text-2xl font-bold" onClick={e => changeQuantity('sub', e)}>
+                -
               </button>
               <input
                 disabled
@@ -181,8 +190,8 @@ export default function CreateArt() {
                 placeholder="1"
                 value={quantity}
               />
-              <button className="text-2xl font-bold" onClick={e => changeQuantity('sub', e)}>
-                -
+              <button className="text-2xl font-bold" onClick={e => changeQuantity('add', e)}>
+                +
               </button>
             </div>
           </div>
