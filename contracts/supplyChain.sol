@@ -233,16 +233,6 @@ function addArtwork(
         return (data.artworkId, data.issueDate);
     }
 
-    // function tokenURI(uint256 tokenId)
-    //     public
-    //     view
-    //     override
-    //     returns (string memory)
-    // {
-    //     require(_exists(tokenId), "Certificate: Token ID does not exist");
-
-    //     return tokenURIs[tokenId];
-    // }
 
     function _beforeTokenTransfer(
         address,
