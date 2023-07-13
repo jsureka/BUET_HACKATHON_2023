@@ -10,11 +10,16 @@ module.exports = {
       display: ['Poppins', 'sans-serif'],
       body: ['"Open Sans"', 'serif'],
     },
+    width: {
+       new: '30%',
+    },
     extend: {
       colors: {
         'primary': '#2B2B2B',
-        'secondary': '#53AF32',
-        'dark': '#F7F8F9',
+        'secondary-1': '#6528F7',
+        'secondary-2': '#A076F9',
+        'secondary-3': '#D7BBF5',
+        'new-gray': '#3B3B3B',
       },
     },
   },
