@@ -297,6 +297,7 @@ contract supplyChain is ERC721URIStorage {
       artworks[artworkId].creator,
       issueDate
     );
+    artworks[artworkId].certificateId = tokenId;
     artworks[artworkId].isVerified = true;
     tokenURIs[tokenId] = tokenURI;
 
