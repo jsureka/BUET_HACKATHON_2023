@@ -17,7 +17,8 @@ export default function CreateArt() {
         console.log('Created!');
     }
 
-    function changeQuantity(type: string) {
+    function changeQuantity(type: string, e) {
+        e.preventDefault();
         if (type === 'add') {
             setQuantity(quantity + 1);
         } else {
@@ -28,6 +29,7 @@ export default function CreateArt() {
     }
 
     function handleImage(e) {
+        e.preventDefault();
         setSelectedFile(e.target.files[0]);
         if(selectedFile !== null) {
             setSelectedFileName(e.target.files[0].name);
@@ -78,9 +80,9 @@ export default function CreateArt() {
                     <div className="mb-8">
                         <h2 className="my-4 font-display text-xl">Quantity</h2>
                         <div className="flex flex-row w-new">
-                            <button className="text-2xl font-bold" onClick={() => changeQuantity('add')}>+</button>
+                            <button className="text-2xl font-bold" onClick={(e) => changeQuantity('add',e)}>+</button>
                             <input disabled className="w-new border mx-4 rounded-md px-4 py-3 focus:outline-none focus:shadow-outline" id="price" type="text" placeholder="1" value={quantity} />
-                            <button className="text-2xl font-bold" onClick={() => changeQuantity('sub')}>-</button>
+                            <button className="text-2xl font-bold" onClick={(e) => changeQuantity('sub', e)}>-</button>
                         </div>
                     </div>
                     <div className="flex items-center">

@@ -5,7 +5,7 @@ import NavbarHome from 'layouts/navbar'
 import { ethers } from 'ethers'
 import { useState, useEffect } from 'react'
 import { useNetwork, useSwitchNetwork, useAccount, useBalance } from 'wagmi'
-import { SupplyChain__factory } from 'typechain/factories/contracts/supplyChain.sol/SupplyChain__factory'
+import { SupplyChain__factory } from 'typechain/factories/contracts/SupplyChain__factory'
 
 export default function Marketplace() {
   const [showAlert, setShowAlert] = useState(false)
