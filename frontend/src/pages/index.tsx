@@ -5,6 +5,7 @@ import StepOne from 'components/HowItWorks/Step1'
 import StepTwo from 'components/HowItWorks/Step2'
 import StepThree from 'components/HowItWorks/Step3'
 import Footer from 'layouts/footer'
+import Link from 'next/link'
 
 const array = [...Array(8)]
 
@@ -17,7 +18,7 @@ export default function Home() {
         <div className='w-3/5 pr-12'>
           <h1 className='text-6xl font-bold capitalize leading-normal'>discover <span className='bg-gradient-to-br from-secondary-1 to-secondary-2 bg-clip-text text-transparent'>unique</span> arts & <span className='bg-gradient-to-br from-secondary-1 to-secondary-2 bg-clip-text text-transparent'>premium</span> collectibles</h1>
           <h4 className='text-2xl font-body mt-6 capitalize leading-normal'>Collect Authentic Artworks from The Artists & Creators across the Globe</h4>
-          <button className='bg-secondary-1 mt-8 px-10 py-3 rounded-2xl font-semibold text-lg font-display'>Get Started</button>
+          <button className='bg-secondary-1 mt-8 px-10 py-3 rounded-2xl font-semibold text-lg font-display' ><h1><Link href='/marketplace'>Get Started</Link></h1></button>
           <div className='flex flex-row my-12 space-x-16'>
               <h1 className='text-2xl'><b className='text-3xl'>240K+</b><br />Total Sale</h1>
               <h1 className='text-2xl'><b className='text-3xl'>100K+</b><br />Auctions</h1>
@@ -39,7 +40,7 @@ export default function Home() {
             <h1 className='font-bold text-4xl'>Discover <span className='bg-gradient-to-br from-secondary-1 to-secondary-2 bg-clip-text text-transparent'>Trending</span> Artworks</h1>
             <h4 className='capitalize text-2xl font-body my-6'>Explore Our Weekly Updated Trending Collection</h4>
           </div>
-          <button className='border border-secondary-2 text-secondary-2 hover:bg-secondary-2 hover:text-white px-6 py-2 rounded-md font-bold text-lg flex flex-row items-center mb-6'><ArrowRightIcon className='h-4 mr-2'/> See All</button>
+          <button className='border border-secondary-2 text-secondary-2 hover:bg-secondary-2 hover:text-white px-6 py-2 rounded-md font-bold text-lg flex flex-row items-center mb-6'><ArrowRightIcon className='h-4 mr-2'/> <h1><Link href='/marketplace'>See All</Link></h1></button>
           </div>
         <div className='flex flex-row justify-between my-12'>
           <div className='w-new h-auto'>

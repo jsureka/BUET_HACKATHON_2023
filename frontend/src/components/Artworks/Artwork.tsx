@@ -2,7 +2,7 @@ import { parse } from 'path'
 import data from '../../info/data.json'
 import { ethers } from 'ethers'
 import { useState, useEffect } from 'react'
-import { SupplyChain__factory } from 'typechain/factories/contracts/supplyChain.sol/SupplyChain__factory'
+import { SupplyChain__factory } from 'typechain/factories/contracts/SupplyChain__factory'
 import { useAccount, useNetwork, useSwitchNetwork, useBalance } from 'wagmi'
 import { utils } from 'web3'
 
