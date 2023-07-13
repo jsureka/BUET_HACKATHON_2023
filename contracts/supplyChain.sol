@@ -6,13 +6,17 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract ArtworkMarketplace  is ERC721URIStorage {
 
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     Counters.Counter private _itemsSold;
-
+    uint256 private tokenIdCounter;
+    address payable verifier;
+    mapping(uint256 => CertificateData) private certificates;
+    mapping(uint256 => string) private tokenURIs;
     address payable owner;
 
     // Constructor
@@ -32,6 +36,11 @@ contract ArtworkMarketplace  is ERC721URIStorage {
         DeliveryStatus deliveryStatus;
         bool isVerified;
     }
+  
+    struct CertificateData {
+        uint256 artworkId;
+        uint256 issueDate;
+    }
 
     // Enum to represent delivery status
     enum DeliveryStatus { NotDelivered, Delivered }
@@ -50,6 +59,8 @@ contract ArtworkMarketplace  is ERC721URIStorage {
     // Mapping to store the bids for each auction
     mapping(uint256 => Bid) public bids;
     uint256 public totalBids;
+
+
     
     // Struct to represent an order
     struct Order {
@@ -80,6 +91,12 @@ contract ArtworkMarketplace  is ERC721URIStorage {
         require(msg.sender == artworks[artworkId].creator, "Only the artwork creator can perform this action");
         _;
     }
+           // Modifier to check if the caller is the artwork verifier
+    modifier onlyVerifier (uint256 artworkId) {
+        require(msg.sender != artworks[artworkId].creator, "Only the artwork verifier can perform this action");
+        _;
+    }
+
 
     // Modifier to check if the artwork exists
     modifier artworkExists(uint256 artworkId) {
@@ -99,6 +116,7 @@ contract ArtworkMarketplace  is ERC721URIStorage {
         _;
     }
 
+
     modifier isVerified(uint256 artworkId) {
         require(artworks[artworkId].isVerified == true, "This artwork is already verified");
         _;
@@ -110,15 +128,14 @@ function addArtwork(
     string memory image,
     uint256 price,
     string memory creatorCredentials,
-    uint256 quantity,
-    string memory tokenURI
+    uint256 quantity
 ) external payable {
     require(quantity > 0, "Quantity must be greater than 0");
 
-        _tokenIds.increment();
-        uint256 newTokenId = _tokenIds.current();
-        _safeMint(msg.sender, newTokenId);
-        _setTokenURI(newTokenId, tokenURI);
+        //     _tokenIds.increment();
+        // uint256 newTokenId = _tokenIds.current();
+        // _safeMint(msg.sender, newTokenId);
+        // _setTokenURI(newTokenId, tokenURI);
 
     totalArtworks++;
     Artwork storage newArtwork = artworks[totalArtworks];
@@ -180,12 +197,50 @@ function addArtwork(
     }
     
     // Verify the authenticity certificate for an artwork
-    function verifyCertificate(uint256 artworkId, address certificate) external artworkExists(artworkId) isVerified(artworkId) {
-        artworkCertificates[artworkId] = certificate;
-    }
-    
+    // function verifyCertificate(uint256 artworkId, address certificate) external artworkExists(artworkId) isVerified(artworkId) {
+    //     artworkCertificates[artworkId] = certificate;
+    // }
+  
     // Check the authenticity certificate for an artwork
     function checkCertificate(uint256 artworkId) external view returns (address) {
         return artworkCertificates[artworkId];
     }
+
+    // verify certificate
+        function issueCertificate(
+        uint256 artworkId,
+        uint256 issueDate,
+        string memory tokenURI
+    ) external onlyVerifier(artworkId) {
+        uint256 tokenId = tokenIdCounter;
+        tokenIdCounter++;
+
+        certificates[tokenId] = CertificateData(artworkId, issueDate);
+        tokenURIs[tokenId] = tokenURI;
+
+        _safeMint(msg.sender, tokenId);
+        _setTokenURI(tokenId, tokenURI);
+    }
+
+    function getCertificateData(uint256 tokenId)
+        public
+        view
+        returns (uint256, uint256)
+    {
+        require(_exists(tokenId), "Certificate: Token ID does not exist");
+
+        CertificateData memory data = certificates[tokenId];
+        return (data.artworkId, data.issueDate);
+    }
+
+
+    function _beforeTokenTransfer(
+        address,
+        address,
+        uint256
+    ) internal pure {
+        revert("Certificate: NFT is non-transferable");
+    }
 }
+
+
