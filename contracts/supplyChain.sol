@@ -136,6 +136,9 @@ contract supplyChain is ERC721URIStorage {
     artworks[totalArtworks].tokenURI = tokenURI;
     artworks[totalArtworks].deadline = deadline;
     artworks[totalArtworks].certificateId = certificateId;
+    if (certificateId != 0) {
+      artworks[totalArtworks].isVerified = true;
+    }
     if (deadline > 0) {
       artworks[totalArtworks].isPremium = true;
     }
@@ -200,9 +203,14 @@ contract supplyChain is ERC721URIStorage {
       value: msg.value
     }("");
     if (artworks[artworkId].certificateId > 0) {
-      (bool sent, ) = payable(
-        certificates[artworks[artworkId].certificateId].creator
-      ).call{ value: (artworks[artworkId].price * 2) / 100 }("");
+      if (
+        certificates[artworks[artworkId].certificateId].creator !=
+        artworks[artworkId].creator
+      ) {
+        (bool sent, ) = payable(
+          certificates[artworks[artworkId].certificateId].creator
+        ).call{ value: (artworks[artworkId].price * 2) / 100 }("");
+      }
     }
     artworks[artworkId].quantity--;
     totalOrders++;

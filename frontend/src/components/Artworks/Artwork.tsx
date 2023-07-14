@@ -16,6 +16,7 @@ export default function SingleArt({ artwork, imgSrc, Title, Artist, price, premi
   const { data: balance, isLoading: isBalanceLoading } = useBalance({
     addressOrName: address,
   })
+  const [convertedDeadline, setConvertedDeadline] = useState('')
 
   async function checkIfWalletIsConnected() {
     const { ethereum } = window
@@ -55,6 +56,7 @@ export default function SingleArt({ artwork, imgSrc, Title, Artist, price, premi
 
   useEffect(() => {
     checkIfWalletIsConnected()
+    setConvertedDeadline(new Date(parseInt(artwork.deadline.toString())).toLocaleDateString())
   }, [])
   return (
     <div>
@@ -83,7 +85,7 @@ export default function SingleArt({ artwork, imgSrc, Title, Artist, price, premi
             {premium ? (
               <div className="mt-6 mb-4">
                 <p className="text-gray-400">Auction Ends In</p>
-                <h1 className="mt-2 bg-secondary-1-dark font-bold">23h : 06m : 12s</h1>
+                <h1 className="mt-2 bg-secondary-1-dark font-bold">{convertedDeadline}</h1>
               </div>
             ) : (
               <div className="mt-8 mb-4">

@@ -6,11 +6,11 @@ import { useEffect, useState } from 'react'
 import { useAccount, useNetwork, useSwitchNetwork, useBalance } from 'wagmi'
 import { SupplyChain__factory } from 'typechain/factories/contracts/SupplyChain__factory'
 import { uploadFileToIPFS } from 'pages/pinata'
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/router'
 
 export default function CreateArt() {
-  const router = useRouter();
-  const { artworkId } = router.query;
+  const router = useRouter()
+  const { artworkId } = router.query
 
   const [quantity, setQuantity] = useState(1)
   const [description, setDescription] = useState('')
@@ -36,32 +36,44 @@ export default function CreateArt() {
     e.preventDefault()
     try {
       //upload the file to IPFS
-      const response = await uploadFileToIPFS(selectedFile)
-      console.log(response)
-      if (response.success === true) {
-        console.log('Uploaded image to Pinata: ' + response.pinataURL)
-        setTokenURI(response.pinataURL)
-
-        const artwork = {
-          description: description,
-          price: price,
-          quantity: quantity,
-          isPremium: isPremium,
-          tokenURI: tokenURI,
-          certificateId: certificateId,
-          deadline: deadline,
-          creator: address,
-        }
-        console.log(artwork)
+      if (artworkId) {
         const provider = new ethers.providers.Web3Provider(window.ethereum)
         const signer = provider.getSigner()
         contract = SupplyChain__factory.connect(data.contractAddress, signer)
-        let tx = await contract.addArtwork(description, price, quantity, response.pinataURL, certificateId, deadline)
+        let tx = await contract.addArtwork(description, price, quantity, tokenURI, certificateId, deadline)
         let reciept = await tx.wait()
         console.log(reciept)
         setTxHash(reciept.transactionHash)
         setShowAlert(true)
         await contract.getAllArtworks()
+      } else {
+        const response = await uploadFileToIPFS(selectedFile)
+        console.log(response)
+        if (response.success === true) {
+          console.log('Uploaded image to Pinata: ' + response.pinataURL)
+          setTokenURI(response.pinataURL)
+
+          const artwork = {
+            description: description,
+            price: price,
+            quantity: quantity,
+            isPremium: isPremium,
+            tokenURI: tokenURI,
+            certificateId: certificateId,
+            deadline: deadline,
+            creator: address,
+          }
+          console.log(artwork)
+          const provider = new ethers.providers.Web3Provider(window.ethereum)
+          const signer = provider.getSigner()
+          contract = SupplyChain__factory.connect(data.contractAddress, signer)
+          let tx = await contract.addArtwork(description, price, quantity, response.pinataURL, certificateId, deadline)
+          let reciept = await tx.wait()
+          console.log(reciept)
+          setTxHash(reciept.transactionHash)
+          setShowAlert(true)
+          await contract.getAllArtworks()
+        }
       }
     } catch (e) {
       console.log('Error during file upload', e)
@@ -108,9 +120,41 @@ export default function CreateArt() {
     console.log(await contract.name())
   }
 
+  async function getArtworkDetails(artworkId) {
+    const { ethereum } = window
+    if (ethereum) {
+      console.log('Got the ethereum object: ', ethereum)
+    } else {
+      console.log('No Wallet found. Connect Wallet')
+    }
+    await window.ethereum.enable()
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const signer = provider.getSigner()
+
+    contract = SupplyChain__factory.connect(data.contractAddress, signer)
+    console.log('Get method:')
+
+    console.log(contract)
+
+    console.log(contract)
+    let artworks = []
+    await contract.artworks(artworkId).then(res => {
+      artworks = res
+      setCertificateId(parseInt(res.certificateId.toString()))
+      setDeadline(parseInt(res.deadline.toString()))
+      setDescription(res.description)
+      setIsPremium(res.isPremium)
+      setPrice(parseInt(res.price.toString()))
+      setQuantity(parseInt(res.quantity.toString()))
+      setTokenURI(res.tokenURI)
+    })
+  }
   useEffect(() => {
-    console.log(artworkId);
+    console.log(artworkId)
     checkIfWalletIsConnected()
+    if (artworkId) {
+      getArtworkDetails(artworkId)
+    }
   }, [])
 
   return (
