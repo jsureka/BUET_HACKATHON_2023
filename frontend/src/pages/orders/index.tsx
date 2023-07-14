@@ -4,7 +4,7 @@ import PlacedOrders from 'components/PlacedOrders/PlacedOrders'
 import { ethers } from 'ethers'
 import NavbarHome from 'layouts/navbar'
 import { useEffect, useState } from 'react'
-import { SupplyChain__factory } from 'typechain/factories/contracts/supplyChain.sol/SupplyChain__factory'
+import { SupplyChain__factory } from 'typechain/factories/contracts/SupplyChain__factory'
 import { useAccount, useNetwork, useSwitchNetwork, useBalance } from 'wagmi'
 import contract from 'web3/eth/contract'
 

@@ -1,4 +1,4 @@
-import { SupplyChain__factory } from 'typechain/factories/contracts/supplyChain.sol/SupplyChain__factory'
+import { SupplyChain__factory } from 'typechain/factories/contracts/SupplyChain__factory'
 import data from '../../info/data.json'
 import { ethers } from 'ethers'
 import { useState, useEffect } from 'react'
