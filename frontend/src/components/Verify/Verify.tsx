@@ -20,7 +20,10 @@ export default function VerifyOrders({ artwork }) {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
     contract = SupplyChain__factory.connect(data.contractAddress, signer)
-    let tx = await contract.issueCertificate(parseInt(artwork[0].toString()), Date.now().toString(), 'verified artwork')
+    let tx = await contract.issueCertificate(parseInt(artwork[0].toString()), Date.now().toString(), 'verified artwork',{
+      from: signer.getAddress(),
+      gasLimit: 2000000,
+    })
     let reciept = await tx.wait()
     console.log(reciept)
     setTxHash(reciept.transactionHash)

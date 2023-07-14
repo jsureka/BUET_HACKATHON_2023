@@ -55,7 +55,7 @@ export default function CreateArt() {
         const provider = new ethers.providers.Web3Provider(window.ethereum)
         const signer = provider.getSigner()
         contract = SupplyChain__factory.connect(data.contractAddress, signer)
-        let tx = await contract.addArtwork(description, price, quantity, tokenURI, 0, 0)
+        let tx = await contract.addArtwork(description, price, quantity, response.pinataURL, 0, 0)
         let reciept = await tx.wait()
         console.log(reciept)
         setTxHash(reciept.transactionHash)
