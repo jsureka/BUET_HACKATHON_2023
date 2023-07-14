@@ -19,7 +19,8 @@ export default function CreateArt() {
   const [tokenURI, setTokenURI] = useState('')
   const [selectedFile, setSelectedFile] = useState(null)
   const [selectedFileName, setSelectedFileName] = useState('No File Chosen')
-  const [auctionTime, setAuctionTime] = useState(new Date());
+  const [deadline, setDeadline] = useState(0)
+  const [certificateId, setCertificateId] = useState(0)
 
   const [showAlert, setShowAlert] = useState(false)
   const [txHash, setTxHash] = useState('')
@@ -47,15 +48,15 @@ export default function CreateArt() {
           quantity: quantity,
           isPremium: isPremium,
           tokenURI: tokenURI,
-          certificateId: 0,
-          deadline: 0,
+          certificateId: certificateId,
+          deadline: deadline,
           creator: address,
         }
         console.log(artwork)
         const provider = new ethers.providers.Web3Provider(window.ethereum)
         const signer = provider.getSigner()
         contract = SupplyChain__factory.connect(data.contractAddress, signer)
-        let tx = await contract.addArtwork(description, price, quantity, response.pinataURL, 0, 0)
+        let tx = await contract.addArtwork(description, price, quantity, response.pinataURL, certificateId, deadline)
         let reciept = await tx.wait()
         console.log(reciept)
         setTxHash(reciept.transactionHash)
@@ -166,21 +167,21 @@ export default function CreateArt() {
               type="number"
               placeholder="1000 WEI"
               value={price}
-              onChange={e => setPrice(e.target.value)}
+              onChange={e => setPrice(parseInt(e.target.value))}
             />
           </div>
           <div className="mb-8">
             <h2 className="my-4 font-display text-xl">Choose Type</h2>
             <MyListbox type={isPremium} setType={setIsPremium} />
           </div>
-          { isPremium ? 
-          <div className="mb-8">
-            <h2 className="my-4 font-display text-xl">Set Auction Ending Time</h2>
-            <input type="datetime-local" onChange={(e) => setAuctionTime(new Date(e.target.value))}/>
-          </div>
-          :
-          <></>
-              }
+          {isPremium ? (
+            <div className="mb-8">
+              <h2 className="my-4 font-display text-xl">Set Auction Ending Time</h2>
+              <input type="datetime-local" onChange={e => setDeadline(+new Date(e.target.value))} />
+            </div>
+          ) : (
+            <></>
+          )}
           <div className="mb-8">
             <h2 className="my-4 font-display text-xl">Quantity</h2>
             <div className="flex w-new flex-row">

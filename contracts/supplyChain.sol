@@ -32,6 +32,7 @@ contract supplyChain is ERC721URIStorage {
     bool isPremium;
     uint256 certificateId;
     uint256 deadline;
+    Bid highestBid;
   }
 
   struct CertificateData {
@@ -68,8 +69,6 @@ contract supplyChain is ERC721URIStorage {
 
   // Struct to represent a bid
   struct Bid {
-    uint256 id;
-    uint256 artworkId;
     address bidder;
     uint256 amount;
   }
@@ -137,6 +136,9 @@ contract supplyChain is ERC721URIStorage {
     artworks[totalArtworks].tokenURI = tokenURI;
     artworks[totalArtworks].deadline = deadline;
     artworks[totalArtworks].certificateId = certificateId;
+    if (deadline > 0) {
+      artworks[totalArtworks].isPremium = true;
+    }
     emit ArtworkAdded(totalArtworks);
   }
 
@@ -197,6 +199,11 @@ contract supplyChain is ERC721URIStorage {
     (bool sent, ) = payable(artworks[artworkId].creator).call{
       value: msg.value
     }("");
+    if (artworks[artworkId].certificateId > 0) {
+      (bool sent, ) = payable(
+        certificates[artworks[artworkId].certificateId].creator
+      ).call{ value: (artworks[artworkId].price * 2) / 100 }("");
+    }
     artworks[artworkId].quantity--;
     totalOrders++;
     orders[totalOrders] = Order(
@@ -266,23 +273,51 @@ contract supplyChain is ERC721URIStorage {
     return buyerOrders;
   }
 
-  // Place a bid in the auction
-  //   function placeBid(
-  //     uint256 artworkId,
-  //     uint256 amount,
-  //     uint256 currentTime
-  //   ) external payable artworkExists(artworkId) {
-  //     require(amount > 0, "Bid amount must be greater than 0");
-  //     require(
-  //       artworks[artworkId].isPremium == true,
-  //       "This product is not approved for bidding"
-  //     );
-  //     artworks[artworkId].totalBids++;
-  //     artworks[artworkId].bids.push(
-  //       Bid(artworks[artworkId].totalBids, artworkId, msg.sender, amount)
-  //     );
-  //     emit BidPlaced(artworks[artworkId].totalBids);
-  //   }
+  //Place a bid in the auction
+  function placeBid(uint256 artworkId)
+    external
+    payable
+    artworkExists(artworkId)
+  {
+    require(msg.value > 0, "Bid amount must be greater than 0");
+    require(
+      artworks[artworkId].deadline > block.timestamp,
+      "Bidding deadline has passed"
+    );
+    if (artworks[artworkId].highestBid.amount < msg.value) {
+      (bool sent, ) = payable(artworks[artworkId].highestBid.bidder).call{
+        value: artworks[artworkId].highestBid.amount
+      }("");
+      artworks[artworkId].highestBid = Bid(msg.sender, msg.value);
+    }
+
+    emit BidPlaced(artworkId);
+  }
+
+  function endAuction(uint256 artworkId) external artworkExists(artworkId) {
+    require(
+      artworks[artworkId].deadline < block.timestamp,
+      "Bidding deadline has not passed"
+    );
+    // only highest bidder can end the auction
+    require(
+      artworks[artworkId].highestBid.bidder == msg.sender,
+      "Only highest bidder can end the auction"
+    );
+    (bool sent, ) = payable(artworks[artworkId].creator).call{
+      value: artworks[artworkId].highestBid.amount
+    }("");
+    artworks[artworkId].quantity--;
+    totalOrders++;
+    orders[totalOrders] = Order(
+      totalOrders,
+      artworkId,
+      msg.sender,
+      DeliveryStatus.NotDelivered
+    );
+
+    emit OrderPlaced(totalOrders);
+  }
 
   // verify certificate
   function issueCertificate(
@@ -321,12 +356,4 @@ contract supplyChain is ERC721URIStorage {
     CertificateData memory data = certificates[tokenId];
     return (data.artworkId, data.creator, data.issueDate);
   }
-
-  //   function _beforeTokenTransfer(
-  //     address,
-  //     address,
-  //     uint256
-  //   ) internal pure {
-  //     revert("Certificate: NFT is non-transferable");
-  //   }
 }
