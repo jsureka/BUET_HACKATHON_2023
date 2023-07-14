@@ -3,6 +3,7 @@ import { ethers } from 'ethers'
 import { useState, useEffect } from 'react'
 import { useNetwork, useSwitchNetwork, useAccount, useBalance } from 'wagmi'
 import { SupplyChain__factory } from 'typechain/factories/contracts/SupplyChain__factory'
+import Link from 'next/link'
 
 export default function OwnOrders({ artworkId, id, status }) {
   const [showAlert, setShowAlert] = useState(false)
@@ -84,9 +85,17 @@ export default function OwnOrders({ artworkId, id, status }) {
         </div>
         <div className="px-6 text-center">
           {status === 2 && (
+            <div className='flex flex-row'>
             <button className="w-8 rounded-lg bg-secondary-2 py-2 px-6 text-white">
               <h1>Received</h1>
             </button>
+            <Link href={`/create?artworkId=${artworkId}`}>
+                <button className="w-8 ml-8 rounded-lg bg-white py-2 px-6 text-secondary-1">
+                    <h1>Re-Sell</h1>
+                </button>
+            </Link>
+            </div>
+            
           )}
           {status === 0 && (
             <button className="w-8 rounded-lg bg-secondary-3 py-2 px-6 text-primary">
