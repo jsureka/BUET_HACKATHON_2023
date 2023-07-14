@@ -1,7 +1,9 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useState } from 'react';
 
-export default function BidModal({isOpen, closeModal}) {
+export default function BidModal({isOpen, closeModal, price}) {
+
+    const [currentBid, setCurrentBid] = useState(null);
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -36,8 +38,9 @@ export default function BidModal({isOpen, closeModal}) {
                 >
                   Place Your Bid
                 </Dialog.Title>
+                <Dialog.Description as="p" className="text-md mt-3">Current Sale Price: <b>{price}</b> WEI</Dialog.Description>
 
-                <input type="text" className='mt-6 w-hundred py-4 px-6 rounded-lg' />
+                <input type="text" className='mt-6 w-hundred py-4 px-6 rounded-lg' onChange={(e) => setCurrentBid(e.target.value)}/>
 
                 <div className="flex mt-8 space-x-8 justify-between">
                   <button
