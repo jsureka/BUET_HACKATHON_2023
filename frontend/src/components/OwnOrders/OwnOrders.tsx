@@ -75,22 +75,22 @@ export default function OwnOrders({ artworkId, id, status }) {
     <>
       <div className="grid grid-cols-3 grid-rows-1 items-center gap-48 py-4 hover:bg-primary">
         <div className="flex flex-row items-center justify-start">
-          <div className="w-12 relative mx-auto my-4 h-12">
+          <div className="w-12 relative my-4 h-12">
             <img className="w-full h-full rounded-md object-cover" src="/soldArt.png" alt="Profile Image" />
           </div>
           <h1 className="text-bold ml-4 text-lg">{id.toString()}</h1>
         </div>
-        <div>
+        <div className='text-center mx-auto'>
           <h1 className="text-lg">{artworkId.toString()}</h1>
         </div>
-        <div className="px-6 text-center">
+        <div className="text-center">
           {status === 2 && (
             <div className='flex flex-row'>
-            <button className="w-8 rounded-lg bg-secondary-2 py-2 px-6 text-white">
+            <button className="w-8 rounded-lg bg-secondary-2 py-2 px-4 text-white">
               <h1>Received</h1>
             </button>
             <Link href={`/create?artworkId=${artworkId}`}>
-                <button className="w-8 ml-8 rounded-lg bg-white py-2 px-6 text-secondary-1">
+                <button className="w-8 ml-8 rounded-lg bg-white py-2 px-5 text-secondary-1">
                     <h1>Re-Sell</h1>
                 </button>
             </Link>
@@ -98,12 +98,12 @@ export default function OwnOrders({ artworkId, id, status }) {
             
           )}
           {status === 0 && (
-            <button className="w-8 rounded-lg bg-secondary-3 py-2 px-6 text-primary">
+            <button className="w-8 rounded-lg bg-secondary-3 py-2 px-5 text-primary">
               <h1>Not Delivered</h1>
             </button>
           )}
           {status === 1 && (
-            <button onClick={e => markAsReceived(e)} className="w-8 rounded-lg bg-secondary-1 py-2 px-6 text-white">
+            <button onClick={e => markAsReceived(e)} className="w-8 rounded-lg bg-secondary-1 py-2 px-5 text-white">
               <h1>Mark as Received</h1>
             </button>
           )}
