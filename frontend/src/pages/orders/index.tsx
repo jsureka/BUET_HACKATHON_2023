@@ -99,9 +99,9 @@ export default function Orders() {
       </div>
       <div className="justify-center bg-new-gray px-48 text-center">
         <div className="flex flex-row justify-between pt-12 pb-8">
-          <h1 className="text-2xl font-bold">Artwork & Collectibles</h1>
-          <h1 className="text-2xl font-bold">Artwork ID</h1>
-          <h1 className="text-2xl font-bold">Current Status</h1>
+          <h1 className="text-xl font-bold">Artwork & Collectibles</h1>
+          <h1 className="text-xl font-bold">Artwork ID</h1>
+          <h1 className="text-xl font-bold">Current Status</h1>
         </div>
         <hr />
         {ownOrder ? (
@@ -111,8 +111,7 @@ export default function Orders() {
                 return <OwnOrders artworkId={order[1]} id={order.id} status={order.deliveryStatus} />
               })}
 
-            {/* <OwnOrders name={'Master Shifu'} id={'001'} status={'Not Delivered'} />
-            <OwnOrders name={'Master Shi'} id={'002'} status={'Delivered'} />
+           {/* <OwnOrders name={'Master Shi'} id={'002'} status={'Delivered'} />
             <OwnOrders name={'Master Shif'} id={'003'} status={'Approve'} />
             <OwnOrders name={'Master Pro'} id={'004'} status={'Approve'} />
             <OwnOrders name={'Master Ultra'} id={'005'} status={'Delivered'} /> */}

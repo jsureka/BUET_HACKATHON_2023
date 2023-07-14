@@ -6,8 +6,12 @@ import { useEffect, useState } from 'react'
 import { useAccount, useNetwork, useSwitchNetwork, useBalance } from 'wagmi'
 import { SupplyChain__factory } from 'typechain/factories/contracts/SupplyChain__factory'
 import { uploadFileToIPFS } from 'pages/pinata'
+import { useRouter } from 'next/router';
 
 export default function CreateArt() {
+  const router = useRouter();
+  const { artworkId } = router.query;
+
   const [quantity, setQuantity] = useState(1)
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState(0)
@@ -104,6 +108,7 @@ export default function CreateArt() {
   }
 
   useEffect(() => {
+    console.log(artworkId);
     checkIfWalletIsConnected()
   }, [])
 
