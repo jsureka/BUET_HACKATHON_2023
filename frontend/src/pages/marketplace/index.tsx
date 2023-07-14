@@ -108,7 +108,7 @@ export default function Marketplace() {
                 />
               )
             })}
-            <SingleArt imgSrc={'/art-5.jpg'} Title={'Testing'} Artist={'Jitesh'} price={'1.4 ETH'} premium={true} />
+            {/* <SingleArt imgSrc={'/art-5.jpg'} Title={'Testing'} Artist={'Jitesh'} price={'1.4 ETH'} premium={true} /> */}
           {/* <SingleArt imgSrc={'/art-1.jpg'} Title={'Testing'} Artist={'Tasmia'} price={'3.5 ETH'} premium={false} /> */}
           {/* <SingleArt imgSrc={'/art-2.jpg'} Title={'Testing'} Artist={'Jitesh'} price={'1.4 ETH'} premium={true} />
           <SingleArt imgSrc={'/art-3.jpg'} Title={'Testing'} Artist={'Mustahid'} price={'4.1 ETH'} premium={false} />
