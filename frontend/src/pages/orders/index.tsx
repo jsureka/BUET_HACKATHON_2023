@@ -106,6 +106,7 @@ export default function Orders() {
         <hr />
         {ownOrder ? (
           <div>
+            <OwnOrders artworkId={'Master Shi'} id={'002'} status={2} />
             {ownOrders &&
               ownOrders.map((order, index) => {
                 return <OwnOrders artworkId={order[1]} id={order.id} status={order.deliveryStatus} />
